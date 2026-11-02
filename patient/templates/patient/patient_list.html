@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Patients | CarePoint{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><p class="eyebrow mb-1">DIRECTORY</p><h1 class="page-title mb-0">Patients</h1></div>
+    <a class="btn btn-primary" href="{% url 'patient_create' %}">＋ Register patient</a>
+</div>
+<form method="get" class="search-panel mb-3">
+    <div class="input-group"><input class="form-control" type="search" name="q" value="{{ query }}" placeholder="Search by name, patient number, phone or email"><button class="btn btn-primary" type="submit">Search</button>{% if query %}<a class="btn btn-outline-secondary" href="{% url 'patient_list' %}">Clear</a>{% endif %}</div>
+</form>
+<div class="card border-0 shadow-sm"><div class="card-body">
+    {% if patients %}
+    <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+        <thead><tr><th>Patient number</th><th>Patient name</th><th>Phone</th><th>Email</th><th>Registered</th><th></th></tr></thead>
+        <tbody>{% for patient in patients %}
+        <tr><td class="fw-semibold">{{ patient.patient_number }}</td><td>{{ patient.full_name }}</td><td>{{ patient.phone_number }}</td><td>{{ patient.email|default:"—" }}</td><td>{{ patient.created_at|date:"d M Y" }}</td><td><a href="{% url 'patient_detail' patient.pk %}">Open</a></td></tr>
+        {% endfor %}</tbody>
+    </table></div>
+    {% else %}<div class="empty-state"><p class="mb-1">No matching patient records found.</p><span class="text-muted small">Try a different search or register a new demo patient.</span></div>{% endif %}
+</div></div>
+{% endblock %}
