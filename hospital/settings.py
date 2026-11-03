@@ -1,11 +1,42 @@
+
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Development-only key. Replace it with an environment variable before deployment.
-SECRET_KEY = "django-insecure-development-only-change-before-deployment"
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+# ==========================================
+# SECURITY CONFIGURATION
+# ==========================================
+
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-development-only-change-before-deployment"
+)
+
+DEBUG = os.environ.get("DJANGO_DEBUG", "False").lower() == "true"
+
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "hospital-management-system-blue-zeta.vercel.app",
+]
+
+# Add additional Vercel domains if required
+VERCEL_URL = os.environ.get("VERCEL_URL")
+
+if VERCEL_URL:
+    ALLOWED_HOSTS.append(VERCEL_URL)
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://hospital-management-system-blue-zeta.vercel.app",
+]
+
+if VERCEL_URL:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{VERCEL_URL}")
+
+# ==========================================
+# APPLICATIONS
+# ==========================================
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -16,6 +47,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "patient",
 ]
+
+# ==========================================
+# MIDDLEWARE
+# ==========================================
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -28,6 +63,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "hospital.urls"
+
+# ==========================================
+# TEMPLATES
+# ==========================================
 
 TEMPLATES = [
     {
@@ -48,6 +87,10 @@ TEMPLATES = [
 WSGI_APPLICATION = "hospital.wsgi.application"
 ASGI_APPLICATION = "hospital.asgi.application"
 
+# ==========================================
+# DATABASE
+# ==========================================
+
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -55,22 +98,66 @@ DATABASES = {
     }
 }
 
+# ==========================================
+# PASSWORD VALIDATION
+# ==========================================
+
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"
+    },
 ]
+
+# ==========================================
+# INTERNATIONALIZATION
+# ==========================================
 
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "Africa/Nairobi"
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = "static/"
-STATICFILES_DIRS = [BASE_DIR / "static"]
-DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# ==========================================
+# STATIC FILES
+# ==========================================
+
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
+# ==========================================
+# AUTHENTICATION
+# ==========================================
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard"
 LOGOUT_REDIRECT_URL = "login"
+
+# ==========================================
+# DEFAULT PRIMARY KEY
+# ==========================================
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# ==========================================
+# PRODUCTION SECURITY
+# ==========================================
+
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
